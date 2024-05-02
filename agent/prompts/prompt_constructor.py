@@ -296,11 +296,24 @@ class MultimodalCoTPromptConstructor(CoTPromptConstructor):
         state_info: StateInfo = trajectory[-1]  # type: ignore[assignment]
 
         obs = state_info["observation"][self.obs_modality]
+
         max_obs_length = self.lm_config.gen_config["max_obs_length"]
         if max_obs_length:
             if self.lm_config.provider == "google":
                 print("NOTE: This is a Gemini model, so we use characters instead of tokens for max_obs_length.")
                 obs = obs[:max_obs_length]
+            elif "llava" in self.lm_config.model:
+                #Assuming modality is in text
+                if self.obs_modality == "text":
+                    #print(dir(self.tokenizer))
+                    encoded_text = self.tokenizer(obs)#.process(obs, max_obs_length)
+
+                    obs = self.tokenizer.decode(encoded_text)
+                else:
+                    raise ValueError(
+                        f"LLava tokenizer for {self.obs_modality} not implemented yet"
+                    )
+
             else:
                 obs = self.tokenizer.decode(self.tokenizer.encode(obs)[:max_obs_length])  # type: ignore[arg-type]
 
@@ -319,6 +332,7 @@ class MultimodalCoTPromptConstructor(CoTPromptConstructor):
         prompt = self.get_lm_api_input(
             intro, examples, current, page_screenshot_img, images
         )
+
         return prompt
 
     def get_lm_api_input(
@@ -395,11 +409,59 @@ class MultimodalCoTPromptConstructor(CoTPromptConstructor):
                     )
                 content = [{"type": "text", "text": current_prompt}] + content
 
-                message.append({"role": "user", "content": content})
+                #message.append({"role": "user", "content": content})
                 return message
             else:
                 raise ValueError(
                     f"GPT-4V models do not support mode {self.lm_config.mode}"
+                )
+        elif "huggingface" in self.lm_config.provider:
+            if "llava" in self.lm_config.model:
+                if self.lm_config.mode == "chat":
+                    message = [ "USER: "]
+                    for (x, y, z) in examples:
+                        example_img = Image.open(z)
+                        message.append(f"Observation\n:{x}\n")
+                        message.extend(
+                            [
+                                "IMAGES:",
+                                "(1) current page screenshot:",
+                                pil_to_vertex(example_img),
+                            ]
+                        )
+                        message.append(f"Action: {y}")
+                    message.extend(
+                        [
+                            "\n" + intro, 
+                            "Above are a few examples."
+                        ]
+                    )
+                    message.append("Now make prediction given the observation")
+                    message.append(f"Observation\n:{current}\n")
+                    message.extend(
+                        [
+                            "IMAGES:",
+                            "(1) current page screenshot:",
+                            pil_to_b64(page_screenshot_img),
+                        ]
+                    )
+                    for image_i, image in enumerate(images):
+                        message.extend(
+                            [
+                                f"({image_i+2}) input image {image_i+1}",
+                                pil_to_b64(image),
+                            ]
+                        )
+                    message.append("ASSISTANT:")
+                    #message = " ".join(message)
+                    return message
+                else:
+                    raise ValueError(
+                        f"Huggingface model {self.lm_config.model} does not support mode {self.lm_config.mode}"
+                    )
+            else:
+                raise ValueError(
+                    f"Huggface model {self.lm_config.model} is not supported"
                 )
         elif "google" in self.lm_config.provider:
             if self.lm_config.mode == "completion":

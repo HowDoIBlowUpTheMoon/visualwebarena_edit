@@ -50,7 +50,10 @@ def construct_llm_config(args: argparse.Namespace) -> LMConfig:
             [args.stop_token] if args.stop_token else None
         )
         llm_config.gen_config["max_obs_length"] = args.max_obs_length
-        llm_config.gen_config["model_endpoint"] = args.model_endpoint
+
+        if "llava" not in llm_config.model:
+            llm_config.gen_config["model_endpoint"] = args.model_endpoint
+
         llm_config.gen_config["max_retry"] = args.max_retry
     else:
         raise NotImplementedError(f"provider {args.provider} not implemented")
