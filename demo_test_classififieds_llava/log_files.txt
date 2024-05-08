@@ -1,9 +1,0 @@
-log_files/log_20240501171046_3834.log
-log_files/log_20240501212210_1203.log
-log_files/log_20240501212350_9642.log
-log_files/log_20240501212428_7936.log
-log_files/log_20240501213209_4279.log
-log_files/log_20240501213557_287.log
-log_files/log_20240501215646_172.log
-log_files/log_20240501220754_5018.log
-log_files/log_20240501220929_4065.log

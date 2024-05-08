@@ -25,15 +25,18 @@ class Tokenizer(object):
     def encode(self, text: str) -> list[int]:
         return self.tokenizer.encode(text)
     
-    # for LLava tokenizer
-    def process(self, text: str, max_obs_length: int = 0) -> list[int]:
-        if max_obs_length > 0: 
-            return self.tokenizer.tokenizer(text, truncation = True, max_length = max_obs_length)
-        else: 
-            return self.tokenizer.tokenizer(text)
-
     def decode(self, ids: list[int]) -> str:
         return self.tokenizer.decode(ids)
+    
+    # for LLava tokenizer
+    def processor_encode(self, text: str, max_length: int = 0, truncation = False) -> list[int]:
+        if max_length > 0: 
+            return self.tokenizer.tokenizer.encode(text, truncation = True, max_length = max_length)
+        else: 
+            return self.tokenizer.tokenizer(text)
+        
+    def processor_decode(self, text: str) -> list[int]:
+        return self.tokenizer.tokenizer.decode(text)
 
     # This breaks LLava Tokenizer!
     def __call__(self, text: str) -> list[int]:

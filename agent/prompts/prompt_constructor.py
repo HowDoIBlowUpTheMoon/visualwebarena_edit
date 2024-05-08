@@ -306,9 +306,9 @@ class MultimodalCoTPromptConstructor(CoTPromptConstructor):
                 #Assuming modality is in text
                 if self.obs_modality == "text":
                     #print(dir(self.tokenizer))
-                    encoded_text = self.tokenizer(obs)#.process(obs, max_obs_length)
-
-                    obs = self.tokenizer.decode(encoded_text)
+                    encoded_text = self.tokenizer.processor_encode(obs, max_length = max_obs_length, truncation = True)#.process(obs, max_obs_length)
+                    obs = self.tokenizer.processor_decode(encoded_text)
+                    #print(type(obs))
                 else:
                     raise ValueError(
                         f"LLava tokenizer for {self.obs_modality} not implemented yet"
@@ -409,7 +409,7 @@ class MultimodalCoTPromptConstructor(CoTPromptConstructor):
                     )
                 content = [{"type": "text", "text": current_prompt}] + content
 
-                #message.append({"role": "user", "content": content})
+                message.append({"role": "user", "content": content})
                 return message
             else:
                 raise ValueError(

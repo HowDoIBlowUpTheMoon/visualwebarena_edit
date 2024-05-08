@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 ### Define the model, result directory, and instruction path variables
 model="gpt-4-vision-preview"
 result_dir="reddit_gpt4_som"
@@ -7,12 +7,12 @@ instruction_path="agent/prompts/jsons/p_som_cot_id_actree_3s.json"
 captioning_model="Salesforce/blip2-flan-t5-xl"
 
 # Define the batch size variable
-batch_size=30
+batch_size=3 #batch_size=30
 
 # Define the starting and ending indices
 start_idx=0
 end_idx=$((start_idx + batch_size))
-max_idx=209
+max_idx=3 #max_idx=209
 
 # Loop until the starting index is less than or equal to 466
 while [ $start_idx -le $max_idx ]
