@@ -126,7 +126,7 @@ def config() -> argparse.Namespace:
         "--eval_captioning_model_device",
         type=str,
         default="cpu",
-        choices=["cpu", "cuda"],
+        choices=["cpu", "cuda", "API"],
         help="Device to run eval captioning model on. By default, runs it on CPU.",
     )
     parser.add_argument(
@@ -173,6 +173,8 @@ def config() -> argparse.Namespace:
     # logging related
     parser.add_argument("--result_dir", type=str, default="")
     args = parser.parse_args()
+
+    print(f"=== Captioning model device is {args.eval_captioning_model_device} ===")
 
     # check the whether the action space is compatible with the observation space
     if (
@@ -266,6 +268,7 @@ def test(
         "image_som",
     ]:
         device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
+        device = args.eval_captioning_model_device if args.eval_captioning_model_device == "API" else device
         dtype = torch.float16 if torch.cuda.is_available() else torch.float32
         caption_image_fn = image_utils.get_captioning_fn(
             device, dtype, args.captioning_model
