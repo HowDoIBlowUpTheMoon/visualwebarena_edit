@@ -24,8 +24,7 @@ def get_captioning_fn(
         raise NotImplementedError(
             "Only BLIP-2 models are currently supported"
         )
-    elif device == "API":
-        print("check!")
+    # elif device == "API":
     #     raise NotImplementedError(
     #         "API requires special handling"
     #     )
@@ -39,6 +38,7 @@ def get_captioning_fn(
         max_new_tokens: int = 32,
     ) -> List[str]:
         if device != "API":
+
             if prompt is None:
                 # Perform VQA
                 inputs = captioning_processor(
@@ -67,8 +67,8 @@ def get_captioning_fn(
                     generated_ids, skip_special_tokens=True
                 )
         else:         
-            print("Using API!")
-            def pil_image_to_bytes(image, format = "JPEG"):
+
+            def pil_image_to_bytes(image, format): # = "JPEG"):
                 img_byte_arr = io.BytesIO()
                 image.save(img_byte_arr, format=format)
                 img_byte_arr.seek(0)
@@ -77,13 +77,15 @@ def get_captioning_fn(
             files = []
 
             for raw_image in images:
-                files.append(("images", ("test" + raw_image.format, pil_image_to_bytes(raw_image), None)))
+                files.append(("images", ("image", pil_image_to_bytes(raw_image, raw_image.format), None)))
 
             headers = {
                 'accept': 'application/json'
             }
 
             url = "http://127.0.0.1:8004/caption/"
+
+            files.append(("max_new_tokens", (None, max_new_tokens)))
 
             if prompt is not None: 
                 assert len(images) == len(
